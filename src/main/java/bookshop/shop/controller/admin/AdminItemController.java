@@ -23,7 +23,7 @@ public class AdminItemController {
     public ResponseEntity<String> itemCreate(@Valid @RequestPart(name = "item") AdminItemRequestDto adminItemRequestDto,
                                              BindingResult bindingResult,
                                              @RequestPart(required = false) List<MultipartFile> itemImageList,
-                                             @RequestPart MultipartFile itemMainImage) {
+                                             @RequestPart(required = false) MultipartFile itemMainImage) {
         ValidationExceptionUtil.checkBindingResult(bindingResult);
         itemService.createItem(adminItemRequestDto, itemImageList, itemMainImage);
         return ResponseEntity.status(HttpStatus.CREATED).body("상품이 신규 등록되었습니다.");
