@@ -44,3 +44,12 @@ spring:
 
 logging.level:
   org.hibernate.SQL: debug
+
+file:
+  dir:
+    item-image: C:\Users\voslr\study\files\bookShopFile\item-image
+    main-image: C:\Users\voslr\study\files\bookShopFile\main-image
+
+
+server:
+  port: 9090

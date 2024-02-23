@@ -14,7 +14,7 @@ import lombok.*;
 public class Member {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String account;
     private String password;
@@ -23,10 +23,10 @@ public class Member {
 
     public static Member createMember(MemberRegisterRequest request) {
         Member member = new Member();
-        member.password = request.getAccount();
+        member.password = request.getPassword();
         member.account = request.getAccount();
         member.name = request.getName();
-        member.email = request.getAccount();
+        member.email = request.getEmail();
         return member;
     }
 
