@@ -34,4 +34,7 @@ public class Member {
         password = encodedPassword;
     }
 
+    public void updatePassword(String changingPassword) {
+       this.password = changingPassword;
+    }
 }

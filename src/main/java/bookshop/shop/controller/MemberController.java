@@ -1,5 +1,6 @@
 package bookshop.shop.controller;
 
+import bookshop.shop.domain.Member;
 import bookshop.shop.dto.MemberRegisterRequest;
 import bookshop.shop.dto.MemberResponseDto;
 import bookshop.shop.service.MemberService;
@@ -21,8 +22,8 @@ public class MemberController {
 
     @GetMapping("/info/{memberId}")
     public ResponseEntity<MemberResponseDto> memberDetails(@PathVariable Long memberId) {
-        MemberResponseDto memberResponseDto = memberService.getMember(memberId);
-        return ResponseEntity.ok(memberResponseDto);
+        Member member = memberService.getMember(memberId);
+        return ResponseEntity.ok(new MemberResponseDto(member));
     }
 
     @PostMapping("/register")
@@ -38,6 +39,16 @@ public class MemberController {
         response.put("maskedAccount", maskedAccount);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/find-password")
+    public ResponseEntity<String> findPassword(@RequestParam String account,@RequestParam String email,@RequestParam String name){
+        memberService.changePasswordAndSendEmail(account,email,name);
+        return ResponseEntity.ok("등록된 이메일로 새 비밀번호가 전송되었습니다");
+    }
+
+
+
+
 
 
 }

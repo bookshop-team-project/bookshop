@@ -1,13 +1,16 @@
 package bookshop.shop.service;
 
+import bookshop.shop.domain.Member;
 import bookshop.shop.dto.MemberRegisterRequest;
 import bookshop.shop.dto.MemberResponseDto;
 import bookshop.shop.exception.member.MemberException;
 import bookshop.shop.exception.member.MemberNotFoundException;
 import bookshop.shop.exception.member.MemberPresentException;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -20,6 +23,16 @@ class MemberServiceTest {
 
     @Autowired
     MemberService memberService;
+
+
+    @Test
+    void changePasswordAndSendEmailTest(){
+        MemberRegisterRequest request = createRequest("testAccount", "test@naver.com", "testPW123!", "testPW123!", "테스트");
+        Long savedId = memberService.createMember(request);
+        String changedPassword = memberService.changePasswordAndSendEmail("testAccount", "test@naver.com", "테스트");
+
+
+    }
 
     @Test
     void getAccountTest() {
@@ -44,8 +57,8 @@ class MemberServiceTest {
         MemberRegisterRequest request = createRequest("testAccount", "test@gmail.com", "testPW123!", "testPW123!", "테스트");
         Long savedId = memberService.createMember(request);
 
-        MemberResponseDto findMember = memberService.getMember(savedId);
-        assertThat(findMember.getAccount()).isEqualTo("testAccount");
+        Member member = memberService.getMember(savedId);
+        assertThat(member.getAccount()).isEqualTo("testAccount");
     }
 
     @Test
