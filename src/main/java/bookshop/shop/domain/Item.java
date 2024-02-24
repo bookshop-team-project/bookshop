@@ -26,4 +26,12 @@ public class Item {
     private String company;
     private LocalDateTime regDate;
 
+    public void updateEntityInfo(Item item) {
+        this.itemName = item.getItemName();
+        this.content = item.getContent();
+        this.price = item.getPrice();
+        this.quantity = item.getQuantity();
+        this.author = item.getAuthor();
+        this.company = item.getCompany();
+    }
 }

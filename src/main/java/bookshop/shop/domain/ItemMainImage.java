@@ -19,4 +19,8 @@ public class ItemMainImage {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id")
     private Item item;
+
+    public void updateEntityInfo(String fileName) {
+        this.fileName = fileName;
+    }
 }

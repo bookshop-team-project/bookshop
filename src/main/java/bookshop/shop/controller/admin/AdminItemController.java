@@ -29,4 +29,16 @@ public class AdminItemController {
         return ResponseEntity.status(HttpStatus.CREATED).body("상품이 신규 등록되었습니다.");
     }
 
+    @PostMapping("/item/{itemId}")
+    public ResponseEntity<String> itemUpdate(@Valid @RequestPart(name = "item") AdminItemRequestDto adminItemRequestDto,
+                                             BindingResult bindingResult,
+                                             @PathVariable Long itemId,
+                                             @RequestPart(required = false) List<MultipartFile> itemImageList,
+                                             @RequestPart(required = false) List<Long> deleteImageIdList,
+                                             @RequestPart(required = false) MultipartFile itemMainImage) {
+        ValidationExceptionUtil.checkBindingResult(bindingResult);
+        itemService.updateItem(itemId, adminItemRequestDto, itemImageList, deleteImageIdList, itemMainImage);
+        return ResponseEntity.status(HttpStatus.CREATED).body("상품이 수정되었습니다.");
+    }
+
 }

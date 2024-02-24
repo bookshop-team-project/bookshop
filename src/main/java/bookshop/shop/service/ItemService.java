@@ -26,6 +26,18 @@ public class ItemService {
         itemImageService.createItemImage(item, itemImageList);
     }
 
+    public void updateItem(Long itemId, AdminItemRequestDto  adminItemRequestDto, List<MultipartFile> itemImageList,
+                           List<Long> deleteImageIdList, MultipartFile itemMainImage) {
+        Item item = getItem(itemId);
+        itemMainImageService.updateItemMainImage(item, itemMainImage);
+        itemImageService.updateItemImage(item, itemImageList, deleteImageIdList);
+        item.updateEntityInfo(toEntity(adminItemRequestDto));
+    }
+
+    public Item getItem(Long itemId) {
+        return itemRepository.findById(itemId).orElseThrow(() -> new IllegalArgumentException("적합한 id 값이 아닙니다."));
+    }
+
     public Item toEntity(AdminItemRequestDto itemRequestDto) {
         return Item.builder()
                 .itemName(itemRequestDto.getItemName())
