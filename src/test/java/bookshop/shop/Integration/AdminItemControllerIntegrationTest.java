@@ -1,5 +1,6 @@
 package bookshop.shop.Integration;
 
+import bookshop.shop.ShopApplication;
 import bookshop.shop.dto.request.AdminItemRequestDto;
 import bookshop.shop.service.ItemService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,7 +25,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-@SpringBootTest
+@SpringBootTest(classes = ShopApplication.class)
 @Transactional
 @AutoConfigureMockMvc
 public class AdminItemControllerIntegrationTest {
