@@ -1,5 +1,6 @@
 package bookshop.shop.Integration;
 
+import bookshop.shop.ShopApplication;
 import bookshop.shop.dto.request.AdminItemRequestDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,7 +21,7 @@ import java.util.List;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
+@SpringBootTest(classes = ShopApplication.class)
 @Transactional
 @AutoConfigureMockMvc
 public class AdminItemControllerIntegrationTest {
