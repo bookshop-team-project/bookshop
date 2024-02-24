@@ -3,8 +3,11 @@ package bookshop.shop.service;
 import bookshop.shop.domain.Member;
 import bookshop.shop.dto.MemberRegisterRequest;
 import bookshop.shop.dto.MemberResponseDto;
+import bookshop.shop.exception.member.MemberException;
+import bookshop.shop.exception.member.MemberNotFoundException;
 import bookshop.shop.exception.member.MemberPresentException;
 import bookshop.shop.repository.MemberRepository;
+import bookshop.shop.service.email.MailService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,22 +19,56 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 @Slf4j
 public class MemberService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final MailService mailService;
 
-    public MemberResponseDto getMember(Long id) {
-        Member member = memberRepository.findById(id).orElseThrow(NoSuchElementException::new);
-        return new MemberResponseDto(member);
+    @Transactional
+    public String changePasswordAndSendEmail(String account, String email, String name) {
+        validateAccountFormat(account);
+        validateEmailFormat(email);
+        Member member = getMember(account, email, name);
+
+        /* --- 임시 비밀번호 변경 --- */
+        String tempPassword = createTempPassword();
+        String encodedTempPassword = passwordEncoder.encode(tempPassword);
+        member.updatePassword(encodedTempPassword);
+
+        /* --- 이메일 전송 --- */
+        mailService.send(email, tempPassword);
+        return tempPassword;
     }
 
+    private String createTempPassword() {
+        UUID uuid = UUID.randomUUID();
+        return uuid.toString().substring(0, 8);
+    }
+
+    public Member getMember(String account, String email, String name) {
+        Member member = memberRepository.findByAccountAndEmailAndName(account, email, name).orElseThrow(MemberNotFoundException::new);
+        return member;
+    }
+
+    public Member getMember(Long id) {
+        Member member = memberRepository.findById(id).orElseThrow(MemberNotFoundException::new);
+        return member;
+    }
+
+    public String getAccount(String email, String name) {
+        validateEmail(email);
+        validateName(name);
+        Member member = memberRepository.findByEmailAndName(email, name).orElseThrow(() -> new MemberNotFoundException("일치하는 회원정보가 없습니다"));
+        return maskAccount(member.getAccount());
+    }
 
     public Long createMember(MemberRegisterRequest request) {
         validateForm(request);
@@ -43,6 +80,18 @@ public class MemberService {
         return member.getId();
     }
 
+    private String maskAccount(String account) {
+        int lastIndex = account.length();
+        String prefix = account.substring(0, 6);
+        String maskedAccount = prefix + "*".repeat(lastIndex - 6); // 빼기 6을 한 이유는, 앞 6글자는 마스킹 되지 않아야 함
+        return maskedAccount;
+    }
+
+    private void validateName(String name) {
+        if (name == null || name.equals("")) {
+            throw new MemberException("잘못된 입력 입니다");
+        }
+    }
 
     private void validateForm(MemberRegisterRequest request) {
         validateAccount(request.getAccount());
@@ -64,15 +113,15 @@ public class MemberService {
     }
 
     private void validateAccountFormat(String account) {
-        log.info("account = {} ",  account);
-        if (account == null || !account.matches("^[a-zA-Z0-9]+$")) {
-            throw new IllegalArgumentException("잘못된 형식의 ID입니다.");
+        log.info("account = {}", account);
+        if (account == null || account.length() < 8 || !account.matches("^[a-zA-Z0-9]+$")) {
+            throw new MemberException("잘못된 형식의 ID입니다. (8자 이상의 영문자 및 숫자로 이루어져야 합니다.)");
         }
     }
 
     private void validatePassword(String password, String passwordConfirm) {
         if (password == null || passwordConfirm == null) {
-            throw new IllegalArgumentException("비밀번호를 올바르게 입력해주세요.");
+            throw new MemberException("비밀번호를 올바르게 입력해주세요.");
         }
         validatePasswordFormat(password);
         validatePasswordSame(password, passwordConfirm);
@@ -80,7 +129,7 @@ public class MemberService {
 
     private void validatePasswordSame(String password, String passwordConfirm) {
         if (!password.equals(passwordConfirm)) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            throw new MemberException("비밀번호가 일치하지 않습니다.");
         }
     }
 
@@ -89,7 +138,7 @@ public class MemberService {
         String passwordPattern = "^(?=.*[@$!%*#?&])[a-zA-Z0-9@$!%*#?&]{8,16}$";
         // 정규표현식을 사용하여 비밀번호 형식을 검사
         if (!Pattern.compile(passwordPattern).matcher(password).matches()) {
-            throw new IllegalArgumentException("비밀번호를 올바르게 입력해주세요.");
+            throw new MemberException("비밀번호를 올바르게 입력해주세요.");
         }
     }
 
@@ -101,7 +150,7 @@ public class MemberService {
 
     private void validateEmailNotEmpty(String email) {
         if (email == null || email.trim().equals("")) {
-            throw new IllegalArgumentException("이메일을 올바르게 입력해주세요.");
+            throw new MemberException("이메일을 올바르게 입력해주세요.");
         }
     }
 
@@ -111,7 +160,9 @@ public class MemberService {
 
         // 정규표현식을 사용하여 이메일 형식을 검사
         if (!Pattern.compile(emailPattern).matcher(email).matches()) {
-            throw new IllegalArgumentException("이메일을 올바르게 입력해주세요.");
+            throw new MemberException("이메일을 올바르게 입력해주세요.");
         }
     }
+
+
 }
