@@ -23,12 +23,12 @@ public class ItemImageService {
     private final ItemImageRepository itemImageRepository;
     private final FileUtil fileUtil;
 
-    public void createItemImage(Item item, List<MultipartFile> multipartFiles) {
-        if (multipartFiles == null) {
-            log.info("첨부된 도서 이미지가 없습니다.");
+    public void createItemImage(Item item, List<MultipartFile> itemImageList) {
+        if (itemImageList == null || itemImageList.isEmpty()) {
+            log.trace("첨부된 도서 이미지가 없습니다.");
             return;
         }
-        List<String> fileNames = fileUtil.saveFiles(fileDir, multipartFiles);
+        List<String> fileNames = fileUtil.saveFiles(fileDir, itemImageList);
         List<ItemImage> itemImages = fileNames.stream()
                 .map(fileName -> ItemImage.builder()
                         .fileName(fileName)
@@ -37,6 +37,26 @@ public class ItemImageService {
                 .toList();
         itemImageRepository.saveAll(itemImages);
 
+    }
+
+    public void updateItemImage(Item item, List<MultipartFile> itemImageList, List<Long> deleteImageIdList) {
+        createItemImage(item, itemImageList);
+        deleteItemImage(deleteImageIdList);
+    }
+
+    public void deleteItemImage(List<Long> deleteImageIdList) {
+        if (deleteImageIdList == null || deleteImageIdList.isEmpty()) {
+            log.trace("삭제할 도서 이미지가 없습니다.");
+        } else {
+            List<String> imageFileNameList = itemImageRepository.findAllById(deleteImageIdList)
+                    .stream().map(ItemImage::getFileName).toList();
+            if (imageFileNameList.size() != 0) {
+                fileUtil.deleteFiles(fileDir, imageFileNameList);
+                itemImageRepository.deleteAllById(deleteImageIdList);
+            } else {
+                throw new IllegalArgumentException("알 수 없는 파일 삭제 요청입니다.");
+            }
+        }
     }
 }
 

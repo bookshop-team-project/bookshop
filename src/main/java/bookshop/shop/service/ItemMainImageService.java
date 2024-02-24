@@ -30,4 +30,15 @@ public class ItemMainImageService {
         ItemMainImage itemMainImage = ItemMainImage.builder().fileName(fileName).item(item).build();
         itemMainImageRepository.save(itemMainImage);
     }
+
+    public void updateItemMainImage(Item item, MultipartFile multipartFile) {
+        if (multipartFile != null) {
+            String updateFileName = fileUtil.saveFile(fileDir, multipartFile);
+            ItemMainImage itemMainImage = itemMainImageRepository.findByItem(item);
+            fileUtil.deleteFile(fileDir, itemMainImage.getFileName());
+            itemMainImage.updateEntityInfo(updateFileName);
+        } else {
+            log.debug("메인 이미지 변경 안 함");
+        }
+    }
 }
