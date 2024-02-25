@@ -41,4 +41,9 @@ public class AdminItemController {
         return ResponseEntity.status(HttpStatus.CREATED).body("상품이 수정되었습니다.");
     }
 
+    @DeleteMapping("/item/{itemId}")
+    public ResponseEntity<String> itemDelete(@PathVariable Long itemId) {
+        itemService.deleteItem(itemId);
+        return ResponseEntity.status(HttpStatus.OK).body("상품이 삭제되었습니다.");
+    }
 }

@@ -36,7 +36,6 @@ public class ItemImageService {
                         .build())
                 .toList();
         itemImageRepository.saveAll(itemImages);
-
     }
 
     public void updateItemImage(Item item, List<MultipartFile> itemImageList, List<Long> deleteImageIdList) {
@@ -57,6 +56,10 @@ public class ItemImageService {
                 throw new IllegalArgumentException("알 수 없는 파일 삭제 요청입니다.");
             }
         }
+    }
+
+    public List<ItemImage> getAllByItem(Item item) {
+        return itemImageRepository.findAllByItem(item);
     }
 }
 

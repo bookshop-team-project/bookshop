@@ -1,6 +1,7 @@
 package bookshop.shop.service;
 
 import bookshop.shop.domain.Item;
+import bookshop.shop.domain.ItemImage;
 import bookshop.shop.dto.request.AdminItemRequestDto;
 import bookshop.shop.repository.ItemRepository;
 import jakarta.transaction.Transactional;
@@ -36,6 +37,14 @@ public class ItemService {
 
     public Item getItem(Long itemId) {
         return itemRepository.findById(itemId).orElseThrow(() -> new IllegalArgumentException("적합한 id 값이 아닙니다."));
+    }
+
+    public void deleteItem(Long itemId) {
+        Item item = getItem(itemId);
+        itemMainImageService.deleteItemMainImage(item);
+        List<Long> deleteList = itemImageService.getAllByItem(item).stream().map(ItemImage::getId).toList();
+        itemImageService.deleteItemImage(deleteList);
+        itemRepository.deleteById(itemId);
     }
 
     public Item toEntity(AdminItemRequestDto itemRequestDto) {
