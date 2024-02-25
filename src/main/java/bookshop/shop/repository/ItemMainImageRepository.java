@@ -6,4 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ItemMainImageRepository extends JpaRepository<ItemMainImage, Long> {
     ItemMainImage findByItem(Item item);
+    void deleteByItem(Item item);
 }

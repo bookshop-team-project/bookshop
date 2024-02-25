@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.List;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -155,8 +156,19 @@ public class AdminItemControllerIntegrationTest {
                 .author("TestAuthor")
                 .company("TestCompany")
                 .build();
-        performRequest("/admin/item/" + itemId, dummyMultipartFileList(dto))
+        performRequest("/admin/item/" + itemId, dummyMultipartFileList(dto2))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("입력값 오류"));
+    }
+
+    /**
+     * DB에 상품 있는지 확인 필요
+     */
+    @Test
+    @DisplayName("상품 삭제 테스트")
+    public void itemDeleteTest() throws Exception {
+        mockMvc.perform(delete("/admin/item/5"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("상품이 삭제되었습니다."));
     }
 }

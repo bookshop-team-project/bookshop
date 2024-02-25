@@ -34,11 +34,21 @@ public class ItemMainImageService {
     public void updateItemMainImage(Item item, MultipartFile multipartFile) {
         if (multipartFile != null) {
             String updateFileName = fileUtil.saveFile(fileDir, multipartFile);
-            ItemMainImage itemMainImage = itemMainImageRepository.findByItem(item);
+            ItemMainImage itemMainImage = getItemMainImage(item);
             fileUtil.deleteFile(fileDir, itemMainImage.getFileName());
             itemMainImage.updateEntityInfo(updateFileName);
         } else {
             log.debug("메인 이미지 변경 안 함");
         }
+    }
+
+    public void deleteItemMainImage(Item item) {
+        String fileName = getItemMainImage(item).getFileName();
+        fileUtil.deleteFile(fileDir, fileName);
+        itemMainImageRepository.deleteByItem(item);
+    }
+
+    public ItemMainImage getItemMainImage(Item item) {
+        return itemMainImageRepository.findByItem(item);
     }
 }
